@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/theme/app_colors.dart';
+import 'package:study_assistent/core/theme/app_colors.dart';
 import '../providers/teacher_provider.dart';
 import '../../domain/models/teacher_model.dart';
 
@@ -267,7 +267,7 @@ class TeacherProfilePage extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Theme.of(context).surfaceTintColor,
+        color: Theme.of(context).cardColor,
         boxShadow: [
           BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 20, offset: const Offset(0, -10)),
         ],

@@ -40,19 +40,19 @@ class StudentDashboard extends ConsumerWidget {
                   _buildProgressSection(context, historyState, isDark),
                   const SizedBox(height: 32),
                   
-                  _buildSectionHeader('Explore Subjects', onSeeAll: () {}),
+                  _buildSectionHeader('Explore Subjects', onSeeAll: () => context.push('/search')),
                   const SizedBox(height: 16),
                   _buildCategories(),
                   const SizedBox(height: 32),
                   _buildLiveClassesBanner(context),
                   const SizedBox(height: 32),
-                  _buildSectionHeader('Top Rated Teachers', onSeeAll: () {}),
+                  _buildSectionHeader('Top Rated Teachers', onSeeAll: () => context.push('/search?filter=teachers')),
                   const SizedBox(height: 16),
-                  _buildTeacherList(),
+                  _buildTeacherList(context),
                   const SizedBox(height: 32),
-                  _buildSectionHeader('Your Recent Lessons', onSeeAll: () {}),
+                  _buildSectionHeader('Your Recent Lessons', onSeeAll: () => context.push('/videos')),
                   const SizedBox(height: 16),
-                  _buildRecentLessons(),
+                  _buildRecentLessons(context),
                   const SizedBox(height: 100),
                 ],
               ),
@@ -225,10 +225,14 @@ class StudentDashboard extends ConsumerWidget {
 
   Widget _buildCategories() {
     final categories = [
-      {'icon': Icons.calculate_outlined, 'label': 'Maths', 'color': Colors.blue},
-      {'icon': Icons.science_outlined, 'label': 'Physics', 'color': Colors.purple},
-      {'icon': Icons.biotech_outlined, 'label': 'Biology', 'color': Colors.green},
-      {'icon': Icons.code_outlined, 'label': 'Coding', 'color': Colors.orange},
+      {'icon': Icons.calculate_rounded, 'label': 'Mathematics', 'color': Colors.blue},
+      {'icon': Icons.bolt_rounded, 'label': 'Physics', 'color': Colors.amber},
+      {'icon': Icons.science_rounded, 'label': 'Chemistry', 'color': Colors.purple},
+      {'icon': Icons.biotech_rounded, 'label': 'Biology', 'color': Colors.green},
+      {'icon': Icons.computer_rounded, 'label': 'Computer Sc.', 'color': Colors.cyan},
+      {'icon': Icons.translate_rounded, 'label': 'English', 'color': Colors.indigo},
+      {'icon': Icons.public_rounded, 'label': 'Geography', 'color': Colors.brown},
+      {'icon': Icons.history_edu_rounded, 'label': 'History', 'color': Colors.deepOrange},
     ];
 
     return SizedBox(
@@ -239,7 +243,7 @@ class StudentDashboard extends ConsumerWidget {
         itemBuilder: (context, index) {
           final cat = categories[index];
           return Container(
-            width: 85,
+            width: 90,
             margin: const EdgeInsets.only(right: 16),
             child: Column(
               children: [
@@ -247,14 +251,17 @@ class StudentDashboard extends ConsumerWidget {
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: (cat['color'] as Color).withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(20),
                   ),
-                  child: Icon(cat['icon'] as IconData, color: cat['color'] as Color),
+                  child: Icon(cat['icon'] as IconData, color: cat['color'] as Color, size: 28),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   cat['label'] as String,
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -309,53 +316,56 @@ class StudentDashboard extends ConsumerWidget {
     );
   }
 
-  Widget _buildTeacherList() {
+  Widget _buildTeacherList(BuildContext context) {
     return SizedBox(
       height: 180,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: 5,
         itemBuilder: (context, index) {
-          return Container(
-            width: 160,
-            margin: const EdgeInsets.only(right: 16),
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.grey.shade100),
-            ),
-            child: Column(
-              children: [
-                const CircleAvatar(
-                  radius: 30,
-                  backgroundImage: NetworkImage('https://i.pravatar.cc/150?u=teacher'),
-                ),
-                const SizedBox(height: 12),
-                const Text(
-                  'Dr. Sarah Wilson',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const Text(
-                  'Mathematics',
-                  style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
-                ),
-                const Spacer(),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(
-                    5,
-                    (i) => Icon(
-                      Icons.star,
-                      size: 14,
-                      color: i < 4 ? Colors.amber : Colors.grey.shade300,
+          return InkWell(
+            onTap: () => context.push('/teacher/T$index'),
+            child: Container(
+              width: 160,
+              margin: const EdgeInsets.only(right: 16),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.grey.shade100),
+              ),
+              child: Column(
+                children: [
+                  const CircleAvatar(
+                    radius: 30,
+                    backgroundImage: NetworkImage('https://i.pravatar.cc/150?u=teacher'),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Dr. Sarah Wilson',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const Text(
+                    'Mathematics',
+                    style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                  ),
+                  const Spacer(),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(
+                      5,
+                      (i) => Icon(
+                        Icons.star,
+                        size: 14,
+                        color: i < 4 ? Colors.amber : Colors.grey.shade300,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           );
         },
@@ -363,7 +373,7 @@ class StudentDashboard extends ConsumerWidget {
     );
   }
 
-  Widget _buildRecentLessons() {
+  Widget _buildRecentLessons(BuildContext context) {
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -372,6 +382,7 @@ class StudentDashboard extends ConsumerWidget {
         return Card(
           margin: const EdgeInsets.only(bottom: 12),
           child: ListTile(
+            onTap: () => context.push('/videos'),
             leading: Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(

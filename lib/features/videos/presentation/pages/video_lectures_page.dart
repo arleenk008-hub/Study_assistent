@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../history/presentation/providers/history_service_provider.dart';
+import 'package:study_assistent/core/theme/app_colors.dart';
+import 'package:study_assistent/features/history/presentation/providers/history_service_provider.dart';
 
 class VideoLecturesPage extends ConsumerWidget {
   const VideoLecturesPage({super.key});

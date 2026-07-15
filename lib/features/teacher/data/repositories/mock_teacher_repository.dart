@@ -70,4 +70,9 @@ class MockTeacherRepository implements ITeacherRepository {
   Future<void> startLiveClass(String classId) async {
     await Future.delayed(const Duration(milliseconds: 500));
   }
+
+  @override
+  Future<void> bookSession(String teacherId, DateTime time) async {
+    await Future.delayed(const Duration(seconds: 1));
+  }
 }

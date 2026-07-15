@@ -15,6 +15,9 @@ import '../../features/history/presentation/pages/history_page.dart';
 import 'package:study_assistent/features/notifications/presentation/pages/notifications_page.dart';
 import 'package:study_assistent/features/chat/presentation/pages/chat_page.dart';
 import 'package:study_assistent/features/search/presentation/pages/search_page.dart';
+import 'package:study_assistent/features/notes/presentation/pages/notes_page.dart';
+import 'package:study_assistent/features/videos/presentation/pages/video_lectures_page.dart';
+import 'package:study_assistent/features/teacher/presentation/pages/teacher_profile_page.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authStateProvider);
@@ -101,6 +104,21 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/search',
         builder: (context, state) => const SearchPage(),
+      ),
+      GoRoute(
+        path: '/notes',
+        builder: (context, state) => const NotesPage(),
+      ),
+      GoRoute(
+        path: '/videos',
+        builder: (context, state) => const VideoLecturesPage(),
+      ),
+      GoRoute(
+        path: '/teacher/:id',
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return TeacherProfilePage(teacherId: id);
+        },
       ),
     ],
   );
