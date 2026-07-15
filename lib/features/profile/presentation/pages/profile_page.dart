@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/providers/theme_provider.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -58,7 +59,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         setState(() {
           _imageFile = File(croppedFile.path);
         });
-        // Logic to upload to backend would go here
       }
     } catch (e) {
       debugPrint('Error cropping image: $e');
@@ -108,6 +108,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final user = ref.watch(authStateProvider).value;
 
     return Scaffold(
       appBar: AppBar(
@@ -131,7 +132,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     backgroundColor: isDark ? AppColors.darkSurface : Colors.grey[200],
                     backgroundImage: _imageFile != null 
                         ? FileImage(_imageFile!) 
-                        : const NetworkImage('https://i.pravatar.cc/150?img=3') as ImageProvider,
+                        : (user?.profilePicture != null 
+                            ? NetworkImage(user!.profilePicture!) 
+                            : const NetworkImage('https://i.pravatar.cc/150?img=3')) as ImageProvider,
                   ),
                   Positioned(
                     bottom: 0,
@@ -153,15 +156,15 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             ).animate().scale(duration: 600.ms, curve: Curves.easeOutBack),
             const SizedBox(height: 16),
             Text(
-              'Aman Deep',
+              user?.name ?? 'Guest User',
               style: TextStyle(
                 fontSize: 24, 
                 fontWeight: FontWeight.bold,
                 color: isDark ? Colors.white : AppColors.secondary,
               ),
             ),
-            const Text(
-              'aman.deep@example.com',
+            Text(
+              user?.email ?? 'No email available',
               style: TextStyle(color: Colors.grey),
             ),
             const SizedBox(height: 32),
@@ -193,7 +196,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             SizedBox(
               width: double.infinity,
               child: OutlinedButton(
-                onPressed: () => context.go('/auth-role'),
+                onPressed: () => ref.read(authControllerProvider.notifier).logout().then((_) => context.go('/auth-role')),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: Colors.red,
                   side: const BorderSide(color: Colors.red),

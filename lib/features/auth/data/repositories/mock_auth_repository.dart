@@ -31,9 +31,15 @@ class MockAuthRepository implements IAuthRepository {
       throw Exception('Invalid credentials provided.');
     }
 
+    // Extracting a name from email for a more personalized feel
+    final nameFromEmail = email.split('@').first;
+    final formattedName = nameFromEmail.isEmpty 
+        ? (role == UserRole.student ? 'Student' : 'Teacher')
+        : nameFromEmail[0].toUpperCase() + nameFromEmail.substring(1);
+
     _currentUser = UserModel(
       id: 'mock_id_${role.name}',
-      name: role == UserRole.student ? 'Mock Student' : 'Mock Teacher',
+      name: formattedName,
       email: email,
       role: role,
       profilePicture: 'https://i.pravatar.cc/150?u=${email}',

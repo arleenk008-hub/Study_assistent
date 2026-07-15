@@ -14,6 +14,7 @@ import '../../features/splash/presentation/pages/splash_page.dart';
 import '../../features/history/presentation/pages/history_page.dart';
 import 'package:study_assistent/features/notifications/presentation/pages/notifications_page.dart';
 import 'package:study_assistent/features/chat/presentation/pages/chat_page.dart';
+import 'package:study_assistent/features/search/presentation/pages/search_page.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authStateProvider);
@@ -91,13 +92,15 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/notifications',
-        builder:(context, state) =>
-            NotificationsPage(),
+        builder: (context, state) => const NotificationsPage(),
       ),
       GoRoute(
         path: '/chat',
-        builder: (context, state) => const
-            ChatPage(),
+        builder: (context, state) => const ChatPage(),
+      ),
+      GoRoute(
+        path: '/search',
+        builder: (context, state) => const SearchPage(),
       ),
     ],
   );

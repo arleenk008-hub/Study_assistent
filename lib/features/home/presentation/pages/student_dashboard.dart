@@ -29,7 +29,7 @@ class StudentDashboard extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildSearchBar(),
+                  _buildSearchBar(context),
                   const SizedBox(height: 24),
                   
                   // Study Session Tracker
@@ -176,30 +176,33 @@ class StudentDashboard extends ConsumerWidget {
     );
   }
 
-  Widget _buildSearchBar() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      height: 56,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.search, color: AppColors.textSecondary),
-          const SizedBox(width: 12),
-          Text(
-            'Search for teachers or courses...',
-            style: TextStyle(color: AppColors.textSecondary.withOpacity(0.7)),
-          ),
-        ],
+  Widget _buildSearchBar(BuildContext context) {
+    return GestureDetector(
+      onTap: () => context.push('/search'),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        height: 56,
+        decoration: BoxDecoration(
+          color: Theme.of(context).brightness == Brightness.dark ? AppColors.surfaceDark : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.search, color: AppColors.textSecondary),
+            const SizedBox(width: 12),
+            Text(
+              'Search for teachers or courses...',
+              style: TextStyle(color: AppColors.textSecondary.withOpacity(0.7)),
+            ),
+          ],
+        ),
       ),
     );
   }
