@@ -74,4 +74,12 @@ class MockAuthRepository implements IAuthRepository {
     _currentUser = null;
     _controller.add(null);
   }
+
+  @override
+  Future<UserModel> updateProfile(UserModel user) async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    _currentUser = user;
+    _controller.add(_currentUser);
+    return _currentUser!;
+  }
 }

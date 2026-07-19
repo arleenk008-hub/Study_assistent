@@ -19,4 +19,6 @@ abstract class IAuthRepository {
   Future<UserModel?> getCurrentUser();
   
   Stream<UserModel?> get authStateChanges;
+
+  Future<UserModel> updateProfile(UserModel user);
 }

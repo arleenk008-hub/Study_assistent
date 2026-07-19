@@ -59,6 +59,7 @@ class UserModel {
     String? email,
     String? profilePicture,
     String? phoneNumber,
+    Map<String, dynamic>? metadata,
   }) {
     return UserModel(
       id: id,
@@ -67,7 +68,7 @@ class UserModel {
       role: role,
       profilePicture: profilePicture ?? this.profilePicture,
       phoneNumber: phoneNumber ?? this.phoneNumber,
-      metadata: metadata,
+      metadata: metadata ?? this.metadata,
     );
   }
 }

@@ -22,7 +22,7 @@ class TeacherProfilePage extends ConsumerWidget {
             _buildSliverAppBar(context, teacher),
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.all(24.0),
+                padding: const EdgeInsets.all(20.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -34,7 +34,7 @@ class TeacherProfilePage extends ConsumerWidget {
                       teacher.bio,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: isDark ? Colors.white70 : AppColors.textSecondaryLight,
-                            height: 1.6,
+                            height: 1.5,
                           ),
                     ),
                     const SizedBox(height: 32),
@@ -49,9 +49,9 @@ class TeacherProfilePage extends ConsumerWidget {
                     _buildSectionTitle('Availability'),
                     const SizedBox(height: 12),
                     _buildAvailability(teacher, isDark),
-                    const SizedBox(height: 40),
+                    const SizedBox(height: 32),
                     _buildPricingSection(teacher, isDark),
-                    const SizedBox(height: 40),
+                    const SizedBox(height: 32),
                     _buildReviewsSection(teacher, isDark),
                     const SizedBox(height: 120),
                   ],
@@ -72,7 +72,7 @@ class TeacherProfilePage extends ConsumerWidget {
 
   Widget _buildSliverAppBar(BuildContext context, TeacherProfile teacher) {
     return SliverAppBar(
-      expandedHeight: 280,
+      expandedHeight: 250,
       pinned: true,
       flexibleSpace: FlexibleSpaceBar(
         background: Stack(
@@ -95,9 +95,9 @@ class TeacherProfilePage extends ConsumerWidget {
               ),
             ),
             Positioned(
-              bottom: 24,
-              left: 24,
-              right: 24,
+              bottom: 20,
+              left: 20,
+              right: 20,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -105,16 +105,18 @@ class TeacherProfilePage extends ConsumerWidget {
                     teacher.name,
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 28,
+                      fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                   Text(
                     teacher.qualification,
                     style: TextStyle(
                       color: Colors.white.withOpacity(0.9),
-                      fontSize: 16,
+                      fontSize: 14,
                     ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
@@ -139,10 +141,10 @@ class TeacherProfilePage extends ConsumerWidget {
   Widget _buildStatItem(String value, String label, IconData icon, Color color) {
     return Column(
       children: [
-        Icon(icon, color: color, size: 28),
-        const SizedBox(height: 8),
-        Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-        Text(label, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+        Icon(icon, color: color, size: 24),
+        const SizedBox(height: 4),
+        Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        Text(label, style: const TextStyle(color: Colors.grey, fontSize: 11)),
       ],
     );
   }
@@ -150,20 +152,20 @@ class TeacherProfilePage extends ConsumerWidget {
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
-      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
     );
   }
 
   Widget _buildChip(String label, bool isDark) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: AppColors.primary.withOpacity(0.1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
         label,
-        style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600, fontSize: 13),
+        style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600, fontSize: 12),
       ),
     );
   }
@@ -174,12 +176,14 @@ class TeacherProfilePage extends ConsumerWidget {
         return Padding(
           padding: const EdgeInsets.only(bottom: 8),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(width: 80, child: Text(e.key, style: const TextStyle(fontWeight: FontWeight.w600))),
+              SizedBox(width: 70, child: Text(e.key, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13))),
               Expanded(
                 child: Wrap(
                   spacing: 8,
-                  children: e.value.map((time) => Text(time, style: const TextStyle(color: Colors.grey))).toList(),
+                  runSpacing: 4,
+                  children: e.value.map((time) => Text(time, style: const TextStyle(color: Colors.grey, fontSize: 13))).toList(),
                 ),
               ),
             ],
@@ -208,11 +212,10 @@ class TeacherProfilePage extends ConsumerWidget {
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: AppColors.primary),
+          Icon(icon, size: 18, color: AppColors.primary),
           const SizedBox(width: 12),
-          Text(service, style: const TextStyle(fontSize: 15)),
-          const Spacer(),
-          Text('₹${price.toInt()}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.secondary)),
+          Expanded(child: Text(service, style: const TextStyle(fontSize: 14), overflow: TextOverflow.ellipsis)),
+          Text('₹${price.toInt()}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: AppColors.secondary)),
         ],
       ),
     );
@@ -226,11 +229,14 @@ class TeacherProfilePage extends ConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             _buildSectionTitle('Student Feedback'),
-            TextButton(onPressed: () {}, child: const Text('See All')),
+            TextButton(
+              onPressed: () {}, 
+              style: TextButton.styleFrom(visualDensity: VisualDensity.compact),
+              child: const Text('See All'),
+            ),
           ],
         ),
         const SizedBox(height: 16),
-        // Mock Review
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -242,16 +248,15 @@ class TeacherProfilePage extends ConsumerWidget {
             children: [
               Row(
                 children: [
-                  const CircleAvatar(radius: 16, child: Text('A')),
-                  const SizedBox(width: 12),
-                  const Text('Aman Deep', style: TextStyle(fontWeight: FontWeight.bold)),
-                  const Spacer(),
+                  const CircleAvatar(radius: 14, child: Text('A', style: TextStyle(fontSize: 12))),
+                  const SizedBox(width: 10),
+                  const Expanded(child: Text('Aman Deep', style: TextStyle(fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)),
                   Row(
-                    children: List.generate(5, (i) => const Icon(Icons.star, size: 14, color: Colors.amber)),
+                    children: List.generate(5, (i) => const Icon(Icons.star, size: 12, color: Colors.amber)),
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
               const Text(
                 'Excellent teaching style. The way Dr. Sarah explains complex integration problems is just amazing.',
                 style: TextStyle(fontSize: 13, height: 1.4),
@@ -265,11 +270,11 @@ class TeacherProfilePage extends ConsumerWidget {
 
   Widget _buildBottomAction(BuildContext context, TeacherProfile teacher) {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 20, offset: const Offset(0, -10)),
+          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, -5)),
         ],
       ),
       child: SafeArea(
@@ -278,14 +283,16 @@ class TeacherProfilePage extends ConsumerWidget {
             Expanded(
               child: OutlinedButton(
                 onPressed: () {},
-                child: const Text('Send Message'),
+                style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12)),
+                child: const Text('Message'),
               ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 12),
             Expanded(
               child: ElevatedButton(
                 onPressed: () {},
-                child: const Text('Book Session'),
+                style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12)),
+                child: const Text('Book Now'),
               ),
             ),
           ],

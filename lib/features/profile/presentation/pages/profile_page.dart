@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/providers/theme_provider.dart';
+import '../../../auth/domain/models/user_model.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
@@ -108,7 +108,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final user = ref.watch(authStateProvider).value;
+    final user = ref.watch(authControllerProvider).value;
 
     return Scaffold(
       appBar: AppBar(
@@ -129,7 +129,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 children: [
                   CircleAvatar(
                     radius: 60,
-                    backgroundColor: isDark ? AppColors.darkSurface : Colors.grey[200],
+                    backgroundColor: isDark ? AppColors.surfaceDark : Colors.grey[200],
                     backgroundImage: _imageFile != null 
                         ? FileImage(_imageFile!) 
                         : (user?.profilePicture != null 
@@ -165,7 +165,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             ),
             Text(
               user?.email ?? 'No email available',
-              style: TextStyle(color: Colors.grey),
+              style: const TextStyle(color: Colors.grey),
             ),
             const SizedBox(height: 32),
             _buildProfileMenuItem(
@@ -190,7 +190,13 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               context: context,
               icon: Icons.edit_outlined,
               title: 'Edit Profile',
-              onTap: () {},
+              onTap: () {
+                if (user?.role == UserRole.teacher) {
+                  context.push('/teacher-edit-profile');
+                } else {
+                  // Standard profile edit for students can be added here
+                }
+              },
             ),
             const SizedBox(height: 32),
             SizedBox(
@@ -222,7 +228,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.darkSurface : Colors.white,
+        color: isDark ? AppColors.surfaceDark : Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           if (!isDark)

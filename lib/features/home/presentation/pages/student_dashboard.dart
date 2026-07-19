@@ -10,11 +10,33 @@ import 'package:study_assistent/features/history/presentation/widgets/study_time
 import 'package:study_assistent/features/notifications/presentation/providers/notifications_provider.dart';
 import 'package:study_assistent/features/notifications/presentation/widgets/notification_button.dart';
 
-class StudentDashboard extends ConsumerWidget {
+class StudentDashboard extends ConsumerStatefulWidget {
   const StudentDashboard({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<StudentDashboard> createState() => _StudentDashboardState();
+}
+
+class _StudentDashboardState extends ConsumerState<StudentDashboard> {
+  final ScrollController _categoryController = ScrollController();
+
+  void _scrollCategories(bool forward) {
+    final double offset = _categoryController.offset + (forward ? 200 : -200);
+    _categoryController.animateTo(
+      offset.clamp(0.0, _categoryController.position.maxScrollExtent),
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  @override
+  void dispose() {
+    _categoryController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final user = ref.watch(authStateProvider).value;
     final historyState = ref.watch(paginatedHistoryProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -22,7 +44,7 @@ class StudentDashboard extends ConsumerWidget {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          _buildAppBar(context, ref, user?.name ?? 'Student'),
+          _buildAppBar(context, user?.name ?? 'Student'),
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.all(20.0),
@@ -40,9 +62,9 @@ class StudentDashboard extends ConsumerWidget {
                   _buildProgressSection(context, historyState, isDark),
                   const SizedBox(height: 32),
                   
-                  _buildSectionHeader('Explore Subjects', onSeeAll: () => context.push('/search')),
+                  _buildSectionHeader('Categories', onSeeAll: () => context.push('/search')),
                   const SizedBox(height: 16),
-                  _buildCategories(),
+                  _buildCategoriesWithScroll(),
                   const SizedBox(height: 32),
                   _buildLiveClassesBanner(context),
                   const SizedBox(height: 32),
@@ -127,7 +149,7 @@ class StudentDashboard extends ConsumerWidget {
     return '${d.inMinutes}m';
   }
 
-  Widget _buildAppBar(BuildContext context, WidgetRef ref, String name) {
+  Widget _buildAppBar(BuildContext context, String name) {
     return SliverAppBar(
       expandedHeight: 120,
       floating: true,
@@ -167,7 +189,6 @@ class StudentDashboard extends ConsumerWidget {
                 ],
               ),
               const Spacer(),
-              // Premium Notification Button with Pulse Animation
               const PremiumNotificationButton(),
             ],
           ),
@@ -223,27 +244,61 @@ class StudentDashboard extends ConsumerWidget {
     );
   }
 
+  Widget _buildCategoriesWithScroll() {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        _buildCategories(),
+        Positioned(
+          left: 0,
+          child: _scrollButton(false),
+        ),
+        Positioned(
+          right: 0,
+          child: _scrollButton(true),
+        ),
+      ],
+    );
+  }
+
+  Widget _scrollButton(bool forward) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.8),
+        shape: BoxShape.circle,
+      ),
+      child: IconButton(
+        icon: Icon(forward ? Icons.arrow_forward_ios : Icons.arrow_back_ios, size: 16),
+        onPressed: () => _scrollCategories(forward),
+      ),
+    );
+  }
+
   Widget _buildCategories() {
     final categories = [
-      {'icon': Icons.calculate_rounded, 'label': 'Mathematics', 'color': Colors.blue},
-      {'icon': Icons.bolt_rounded, 'label': 'Physics', 'color': Colors.amber},
-      {'icon': Icons.science_rounded, 'label': 'Chemistry', 'color': Colors.purple},
-      {'icon': Icons.biotech_rounded, 'label': 'Biology', 'color': Colors.green},
-      {'icon': Icons.computer_rounded, 'label': 'Computer Sc.', 'color': Colors.cyan},
-      {'icon': Icons.translate_rounded, 'label': 'English', 'color': Colors.indigo},
-      {'icon': Icons.public_rounded, 'label': 'Geography', 'color': Colors.brown},
-      {'icon': Icons.history_edu_rounded, 'label': 'History', 'color': Colors.deepOrange},
+      {'icon': Icons.school_rounded, 'label': 'Academics', 'color': Colors.blue},
+      {'icon': Icons.code_rounded, 'label': 'Programming & Coding', 'color': Colors.green},
+      {'icon': Icons.assignment_rounded, 'label': 'Competitive Exams', 'color': Colors.orange},
+      {'icon': Icons.translate_rounded, 'label': 'Languages', 'color': Colors.purple},
+      {'icon': Icons.palette_rounded, 'label': 'Design & Creativity', 'color': Colors.pink},
+      {'icon': Icons.business_center_rounded, 'label': 'Business & Finance', 'color': Colors.teal},
+      {'icon': Icons.music_note_rounded, 'label': 'Music', 'color': Colors.indigo},
+      {'icon': Icons.fitness_center_rounded, 'label': 'Health & Fitness', 'color': Colors.red},
+      {'icon': Icons.psychology_rounded, 'label': 'AI & Technology', 'color': Colors.cyan},
+      {'icon': Icons.auto_stories_rounded, 'label': 'Personal Development', 'color': Colors.amber},
     ];
 
     return SizedBox(
-      height: 100,
+      height: 110,
       child: ListView.builder(
+        controller: _categoryController,
         scrollDirection: Axis.horizontal,
         itemCount: categories.length,
+        padding: const EdgeInsets.symmetric(horizontal: 24),
         itemBuilder: (context, index) {
           final cat = categories[index];
           return Container(
-            width: 90,
+            width: 120,
             margin: const EdgeInsets.only(right: 16),
             child: Column(
               children: [
@@ -260,7 +315,7 @@ class StudentDashboard extends ConsumerWidget {
                   cat['label'] as String,
                   style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
                   textAlign: TextAlign.center,
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
               ],
@@ -330,7 +385,7 @@ class StudentDashboard extends ConsumerWidget {
               margin: const EdgeInsets.only(right: 16),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: Colors.grey.shade100),
               ),

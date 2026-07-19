@@ -3,8 +3,30 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  final ScrollController _categoryController = ScrollController();
+
+  void _scrollCategories(bool forward) {
+    final double offset = _categoryController.offset + (forward ? 200 : -200);
+    _categoryController.animateTo(
+      offset.clamp(0.0, _categoryController.position.maxScrollExtent),
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  @override
+  void dispose() {
+    _categoryController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,9 +44,9 @@ class HomePage extends StatelessWidget {
                 children: [
                   _buildSearchBar(context),
                   const SizedBox(height: 24),
-                  _buildSectionHeader(context, 'Explore Categories', onSeeAll: () {}),
+                  _buildSectionHeader(context, 'Categories', onSeeAll: () => context.push('/search')),
                   const SizedBox(height: 16),
-                  _buildCategories(context),
+                  _buildCategoriesWithScroll(),
                   const SizedBox(height: 24),
                   _buildSectionHeader(context, 'Live Classes', onSeeAll: () {}),
                   const SizedBox(height: 16),
@@ -32,7 +54,7 @@ class HomePage extends StatelessWidget {
                   const SizedBox(height: 24),
                   _buildAIPromptCard(context),
                   const SizedBox(height: 24),
-                  _buildSectionHeader(context, 'Popular Teachers', onSeeAll: () {}),
+                  _buildSectionHeader(context, 'Popular Teachers', onSeeAll: () => context.push('/search?filter=teachers')),
                   const SizedBox(height: 16),
                   _buildPopularTeachers(context),
                   const SizedBox(height: 24),
@@ -158,43 +180,86 @@ class HomePage extends StatelessWidget {
     );
   }
 
+  Widget _buildCategoriesWithScroll() {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        _buildCategories(context),
+        Positioned(
+          left: 0,
+          child: _scrollButton(false),
+        ),
+        Positioned(
+          right: 0,
+          child: _scrollButton(true),
+        ),
+      ],
+    );
+  }
+
+  Widget _scrollButton(bool forward) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.8),
+        shape: BoxShape.circle,
+      ),
+      child: IconButton(
+        icon: Icon(forward ? Icons.arrow_forward_ios : Icons.arrow_back_ios, size: 16),
+        onPressed: () => _scrollCategories(forward),
+      ),
+    );
+  }
+
   Widget _buildCategories(BuildContext context) {
     final categories = [
-      {'icon': Icons.calculate, 'label': 'JEE'},
-      {'icon': Icons.biotech, 'label': 'NEET'},
-      {'icon': Icons.gavel, 'label': 'UPSC'},
-      {'icon': Icons.account_balance, 'label': 'SSC'},
-      {'icon': Icons.code, 'label': 'Coding'},
+      {'icon': Icons.school_rounded, 'label': 'Academics', 'color': Colors.blue},
+      {'icon': Icons.code_rounded, 'label': 'Programming & Coding', 'color': Colors.green},
+      {'icon': Icons.assignment_rounded, 'label': 'Competitive Exams', 'color': Colors.orange},
+      {'icon': Icons.translate_rounded, 'label': 'Languages', 'color': Colors.purple},
+      {'icon': Icons.palette_rounded, 'label': 'Design & Creativity', 'color': Colors.pink},
+      {'icon': Icons.business_center_rounded, 'label': 'Business & Finance', 'color': Colors.teal},
+      {'icon': Icons.music_note_rounded, 'label': 'Music', 'color': Colors.indigo},
+      {'icon': Icons.fitness_center_rounded, 'label': 'Health & Fitness', 'color': Colors.red},
+      {'icon': Icons.psychology_rounded, 'label': 'AI & Technology', 'color': Colors.cyan},
+      {'icon': Icons.auto_stories_rounded, 'label': 'Personal Development', 'color': Colors.amber},
     ];
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return SizedBox(
-      height: 90,
+      height: 110,
       child: ListView.builder(
+        controller: _categoryController,
         scrollDirection: Axis.horizontal,
         itemCount: categories.length,
+        padding: const EdgeInsets.symmetric(horizontal: 24),
         itemBuilder: (context, i) => Padding(
           padding: const EdgeInsets.only(right: 16),
           child: InkWell(
-            onTap: () => context.push('/exam/${categories[i]['label']}'),
+            onTap: () => context.push('/search?category=${categories[i]['label']}'),
             borderRadius: BorderRadius.circular(16),
-            child: Column(
-              children: [
-                CircleAvatar(
-                  radius: 28,
-                  backgroundColor: AppColors.primary.withOpacity(0.1),
-                  child: Icon(categories[i]['icon'] as IconData, color: AppColors.primary),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  categories[i]['label'] as String, 
-                  style: TextStyle(
-                    fontSize: 12, 
-                    fontWeight: FontWeight.w500,
-                    color: isDark ? Colors.white70 : Colors.black87,
+            child: SizedBox(
+              width: 120,
+              child: Column(
+                children: [
+                  CircleAvatar(
+                    radius: 28,
+                    backgroundColor: (categories[i]['color'] as Color).withOpacity(0.1),
+                    child: Icon(categories[i]['icon'] as IconData, color: categories[i]['color'] as Color),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 8),
+                  Text(
+                    categories[i]['label'] as String, 
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 11, 
+                      fontWeight: FontWeight.w600,
+                      color: isDark ? Colors.white70 : Colors.black87,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ).animate().fade(delay: (i * 100).ms).slideX(),

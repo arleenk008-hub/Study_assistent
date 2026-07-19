@@ -18,6 +18,9 @@ import 'package:study_assistent/features/search/presentation/pages/search_page.d
 import 'package:study_assistent/features/notes/presentation/pages/notes_page.dart';
 import 'package:study_assistent/features/videos/presentation/pages/video_lectures_page.dart';
 import 'package:study_assistent/features/teacher/presentation/pages/teacher_profile_page.dart';
+import 'package:study_assistent/features/teacher/presentation/pages/teacher_edit_profile_page.dart';
+import 'package:study_assistent/features/teacher/presentation/pages/student_requests_page.dart';
+import 'package:study_assistent/features/notes/presentation/pages/add_note_page.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authStateProvider);
@@ -110,6 +113,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const NotesPage(),
       ),
       GoRoute(
+        path: '/add-note',
+        builder: (context, state) => const AddNotePage(),
+      ),
+      GoRoute(
         path: '/videos',
         builder: (context, state) => const VideoLecturesPage(),
       ),
@@ -119,6 +126,14 @@ final routerProvider = Provider<GoRouter>((ref) {
           final id = state.pathParameters['id']!;
           return TeacherProfilePage(teacherId: id);
         },
+      ),
+      GoRoute(
+        path: '/teacher-edit-profile',
+        builder: (context, state) => const TeacherEditProfilePage(),
+      ),
+      GoRoute(
+        path: '/student-requests',
+        builder: (context, state) => const StudentRequestsPage(),
       ),
     ],
   );

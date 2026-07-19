@@ -16,7 +16,7 @@ class TeacherDashboard extends ConsumerWidget {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          _buildAppBar(context, user?.name ?? 'Instructor'),
+          _buildAppBar(context, user?.name ?? 'Instructor', user?.profilePicture),
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.all(20.0),
@@ -29,7 +29,11 @@ class TeacherDashboard extends ConsumerWidget {
                   const SizedBox(height: 16),
                   _buildLiveClassesList(isDark),
                   const SizedBox(height: 32),
-                  _buildSectionHeader('Student Requests', 'View All', () {}),
+                  _buildSectionHeader(
+                    'Student Requests', 
+                    'View All', 
+                    () => context.push('/student-requests'),
+                  ),
                   const SizedBox(height: 16),
                   _buildRequestsList(isDark),
                   const SizedBox(height: 32),
@@ -44,39 +48,59 @@ class TeacherDashboard extends ConsumerWidget {
     );
   }
 
-  Widget _buildAppBar(BuildContext context, String name) {
+  Widget _buildAppBar(BuildContext context, String name, String? profilePic) {
     return SliverAppBar(
-      expandedHeight: 100,
+      expandedHeight: 120,
       pinned: true,
       elevation: 0,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       flexibleSpace: FlexibleSpaceBar(
         background: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 60, 20, 0),
+          padding: const EdgeInsets.fromLTRB(20, 50, 20, 0),
           child: Row(
             children: [
-              const CircleAvatar(
-                radius: 22,
-                backgroundColor: AppColors.secondary,
-                child: Icon(Icons.person, color: Colors.white, size: 20),
+              GestureDetector(
+                onTap: () => context.push('/profile'),
+                child: CircleAvatar(
+                  radius: 22,
+                  backgroundColor: AppColors.secondary,
+                  backgroundImage: profilePic != null ? NetworkImage(profilePic) : null,
+                  child: profilePic == null ? const Icon(Icons.person, color: Colors.white, size: 20) : null,
+                ),
               ),
               const SizedBox(width: 12),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Instructor Dashboard', style: TextStyle(color: AppColors.textSecondaryLight, fontSize: 12)),
-                  Text(name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                ],
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => context.push('/profile'),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Instructor Dashboard',
+                        style: TextStyle(color: AppColors.textSecondaryLight, fontSize: 11),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        name,
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              const Spacer(),
               IconButton(
                 onPressed: () => context.push('/notifications'),
                 icon: const Icon(Icons.notifications_none_rounded),
+                constraints: const BoxConstraints(),
+                padding: const EdgeInsets.all(8),
               ),
               IconButton(
-                onPressed: () => context.push('/profile'),
+                onPressed: () => context.push('/settings'),
                 icon: const Icon(Icons.settings_outlined),
+                constraints: const BoxConstraints(),
+                padding: const EdgeInsets.all(8),
               ),
             ],
           ),
@@ -105,14 +129,17 @@ class TeacherDashboard extends ConsumerWidget {
         children: [
           const Text('Total Revenue', style: TextStyle(color: Colors.white70, fontSize: 14)),
           const SizedBox(height: 4),
-          const Text('₹1,24,500.00', style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
+          const FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text('₹1,24,500.00', style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
+          ),
           const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _summaryStat('14', 'Classes', Icons.video_camera_back),
-              _summaryStat('89', 'Students', Icons.people_outline),
-              _summaryStat('4.9', 'Rating', Icons.star_outline),
+              Flexible(child: _summaryStat('14', 'Classes', Icons.video_camera_back)),
+              Flexible(child: _summaryStat('89', 'Students', Icons.people_outline)),
+              Flexible(child: _summaryStat('4.9', 'Rating', Icons.star_outline)),
             ],
           ),
         ],
@@ -122,15 +149,23 @@ class TeacherDashboard extends ConsumerWidget {
 
   Widget _summaryStat(String value, String label, IconData icon) {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, color: Colors.white60, size: 16),
-        const SizedBox(width: 6),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(value, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-            Text(label, style: const TextStyle(color: Colors.white60, fontSize: 10)),
-          ],
+        Icon(icon, color: Colors.white60, size: 14),
+        const SizedBox(width: 4),
+        Flexible(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(value, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+              Text(
+                label,
+                style: const TextStyle(color: Colors.white60, fontSize: 10),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -140,8 +175,18 @@ class TeacherDashboard extends ConsumerWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-        TextButton(onPressed: onAction, child: Text(action)),
+        Expanded(
+          child: Text(
+            title,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        TextButton(
+          onPressed: onAction,
+          style: TextButton.styleFrom(visualDensity: VisualDensity.compact),
+          child: Text(action),
+        ),
       ],
     );
   }
@@ -161,16 +206,17 @@ class TeacherDashboard extends ConsumerWidget {
             decoration: BoxDecoration(color: Colors.red.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
             child: const Icon(Icons.live_tv_rounded, color: Colors.red),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 12),
           const Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Calculus - Level 2', style: TextStyle(fontWeight: FontWeight.bold)),
-                Text('Starts in 45 mins', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                Text('Calculus - Level 2', style: TextStyle(fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis),
+                Text('Starts in 45 mins', style: TextStyle(color: Colors.grey, fontSize: 12), overflow: TextOverflow.ellipsis),
               ],
             ),
           ),
+          const SizedBox(width: 8),
           ElevatedButton(
             onPressed: () {},
             style: ElevatedButton.styleFrom(
@@ -188,13 +234,23 @@ class TeacherDashboard extends ConsumerWidget {
     return Card(
       child: ListTile(
         leading: const CircleAvatar(child: Text('AD')),
-        title: const Text('Aman Deep'),
-        subtitle: const Text('Requested 1:1 Algebra Session'),
+        title: const Text('Aman Deep', overflow: TextOverflow.ellipsis),
+        subtitle: const Text('Requested 1:1 Algebra Session', overflow: TextOverflow.ellipsis),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            IconButton(icon: const Icon(Icons.check_circle_outline, color: AppColors.secondary), onPressed: () {}),
-            IconButton(icon: const Icon(Icons.cancel_outlined, color: AppColors.error), onPressed: () {}),
+            IconButton(
+              icon: const Icon(Icons.check_circle_outline, color: AppColors.secondary),
+              onPressed: () {},
+              constraints: const BoxConstraints(),
+              padding: const EdgeInsets.all(4),
+            ),
+            IconButton(
+              icon: const Icon(Icons.cancel_outlined, color: AppColors.error),
+              onPressed: () {},
+              constraints: const BoxConstraints(),
+              padding: const EdgeInsets.all(4),
+            ),
           ],
         ),
       ),
@@ -203,10 +259,30 @@ class TeacherDashboard extends ConsumerWidget {
 
   Widget _buildQuickManagement(BuildContext context, bool isDark) {
     final tools = [
-      {'icon': Icons.description_outlined, 'label': 'Upload Notes', 'color': Colors.blue},
-      {'icon': Icons.quiz_outlined, 'label': 'Test Sheets', 'color': Colors.purple},
-      {'icon': Icons.assignment_outlined, 'label': 'Assignments', 'color': Colors.orange},
-      {'icon': Icons.chat_bubble_outline, 'label': 'Student Doubts', 'color': Colors.teal},
+      {
+        'icon': Icons.description_outlined, 
+        'label': 'Upload Notes', 
+        'color': Colors.blue,
+        'route': '/add-note'
+      },
+      {
+        'icon': Icons.quiz_outlined, 
+        'label': 'Test Sheets', 
+        'color': Colors.purple,
+        'route': null
+      },
+      {
+        'icon': Icons.assignment_outlined, 
+        'label': 'Assignments', 
+        'color': Colors.orange,
+        'route': null
+      },
+      {
+        'icon': Icons.chat_bubble_outline, 
+        'label': 'Student Doubts', 
+        'color': Colors.teal,
+        'route': '/chat'
+      },
     ];
 
     return GridView.builder(
@@ -221,19 +297,30 @@ class TeacherDashboard extends ConsumerWidget {
       itemCount: tools.length,
       itemBuilder: (context, index) {
         final tool = tools[index];
-        return Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: (tool['icon_color'] as Color? ?? tool['color'] as Color).withOpacity(0.05),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: (tool['color'] as Color).withOpacity(0.1)),
-          ),
-          child: Row(
-            children: [
-              Icon(tool['icon'] as IconData, color: tool['color'] as Color),
-              const SizedBox(width: 12),
-              Text(tool['label'] as String, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
-            ],
+        return InkWell(
+          onTap: tool['route'] != null ? () => context.push(tool['route'] as String) : null,
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: (tool['color'] as Color).withOpacity(0.05),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: (tool['color'] as Color).withOpacity(0.1)),
+            ),
+            child: Row(
+              children: [
+                Icon(tool['icon'] as IconData, color: tool['color'] as Color, size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    tool['label'] as String,
+                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },

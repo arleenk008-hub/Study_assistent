@@ -46,6 +46,16 @@ class AuthController extends StateNotifier<AsyncValue<UserModel?>> {
     }
   }
 
+  Future<void> updateProfile(UserModel user) async {
+    state = const AsyncValue.loading();
+    try {
+      final updatedUser = await _repository.updateProfile(user);
+      state = AsyncValue.data(updatedUser);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+    }
+  }
+
   Future<void> logout() async {
     // Log logout activity
     await _ref.read(historyServiceProvider).logAuthActivity(false);
