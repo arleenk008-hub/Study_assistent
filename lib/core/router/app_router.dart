@@ -6,6 +6,7 @@ import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/auth/presentation/pages/auth_role_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
+import '../../features/auth/presentation/pages/welcome_page.dart';
 import '../../features/home/presentation/pages/student_dashboard.dart';
 import '../../features/teacher/presentation/pages/teacher_dashboard.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
@@ -30,18 +31,19 @@ final routerProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final user = authState.value;
       final isSplash = state.uri.path == '/splash';
-      final isLoggingIn = state.uri.path == '/login' || 
-                         state.uri.path == '/register' || 
-                         state.uri.path == '/auth-role';
+      final isWelcome = state.uri.path == '/welcome';
+      final isAuth = state.uri.path == '/login' || 
+                    state.uri.path == '/register' || 
+                    state.uri.path == '/auth-role';
 
       if (authState.isLoading) return null;
 
       if (user == null) {
-        if (isLoggingIn || isSplash) return null;
-        return '/auth-role';
+        if (isSplash || isWelcome || isAuth) return null;
+        return '/welcome';
       }
 
-      if (isLoggingIn || isSplash) {
+      if (isSplash || isWelcome || isAuth) {
         return user.role == UserRole.teacher ? '/teacher-dashboard' : '/';
       }
 
@@ -51,6 +53,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/splash',
         builder: (context, state) => const SplashPage(),
+      ),
+      GoRoute(
+        path: '/welcome',
+        builder: (context, state) => const WelcomePage(),
       ),
       GoRoute(
         path: '/auth-role',
@@ -74,12 +80,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           return RegisterPage(role: role);
         },
       ),
-      // Student Hub
       GoRoute(
         path: '/',
         builder: (context, state) => const StudentDashboard(),
       ),
-      // Teacher Hub
       GoRoute(
         path: '/teacher-dashboard',
         builder: (context, state) => const TeacherDashboard(),
@@ -106,7 +110,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/search',
-        builder: (context, state) => const SearchPage(),
+        builder: (context, state) {
+          final category = state.uri.queryParameters['category'];
+          return SearchPage(initialCategory: category);
+        },
       ),
       GoRoute(
         path: '/notes',

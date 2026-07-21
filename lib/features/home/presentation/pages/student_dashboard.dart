@@ -297,28 +297,33 @@ class _StudentDashboardState extends ConsumerState<StudentDashboard> {
         padding: const EdgeInsets.symmetric(horizontal: 24),
         itemBuilder: (context, index) {
           final cat = categories[index];
-          return Container(
-            width: 120,
-            margin: const EdgeInsets.only(right: 16),
-            child: Column(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: (cat['color'] as Color).withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(20),
+          final label = cat['label'] as String;
+          return InkWell(
+            onTap: () => context.push('/search?category=$label'),
+            borderRadius: BorderRadius.circular(20),
+            child: Container(
+              width: 120,
+              margin: const EdgeInsets.only(right: 16),
+              child: Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: (cat['color'] as Color).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Icon(cat['icon'] as IconData, color: cat['color'] as Color, size: 28),
                   ),
-                  child: Icon(cat['icon'] as IconData, color: cat['color'] as Color, size: 28),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  cat['label'] as String,
-                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+                  const SizedBox(height: 8),
+                  Text(
+                    label,
+                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
             ),
           );
         },

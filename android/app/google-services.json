@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "87186500702",
+    "project_id": "mentora-e9075",
+    "storage_bucket": "mentora-e9075.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:87186500702:android:dbc8dcfcdf4e6a001018cf",
+        "android_client_info": {
+          "package_name": "com.example.study_assistent"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyChKudt5t075sO8wBGOGeexquqV24zX8bs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

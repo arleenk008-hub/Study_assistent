@@ -1,21 +1,20 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/models/user_model.dart';
 import '../../domain/repositories/auth_repository_interface.dart';
-import '../../data/repositories/mock_auth_repository.dart';
+import '../../data/repositories/firebase_auth_repository.dart';
 import '../../../history/presentation/providers/history_service_provider.dart';
 
-// Repository Provider
+// Force use of Firebase - Mock repository is now completely removed from here
 final authRepositoryProvider = Provider<IAuthRepository>((ref) {
-  // In production, you would switch this to a real BackendAuthRepository
-  return MockAuthRepository();
+  return FirebaseAuthRepository();
 });
 
-// Auth State Provider
+// Real-time stream of the authenticated user from Firebase
 final authStateProvider = StreamProvider<UserModel?>((ref) {
   return ref.watch(authRepositoryProvider).authStateChanges;
 });
 
-// Auth Controller
+// Auth Controller to manage login/register actions
 class AuthController extends StateNotifier<AsyncValue<UserModel?>> {
   final IAuthRepository _repository;
   final Ref _ref;
@@ -26,11 +25,11 @@ class AuthController extends StateNotifier<AsyncValue<UserModel?>> {
     state = const AsyncValue.loading();
     try {
       final user = await _repository.login(email: email, password: password, role: role);
-      // Log login activity
       await _ref.read(historyServiceProvider).logAuthActivity(true);
       state = AsyncValue.data(user);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
+      throw e; // Rethrow to catch in the UI (Login/Register pages)
     }
   }
 
@@ -38,11 +37,11 @@ class AuthController extends StateNotifier<AsyncValue<UserModel?>> {
     state = const AsyncValue.loading();
     try {
       final user = await _repository.register(name: name, email: email, password: password, role: role);
-      // Log login activity after registration
       await _ref.read(historyServiceProvider).logAuthActivity(true);
       state = AsyncValue.data(user);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
+      throw e; // Rethrow to catch in the UI
     }
   }
 
@@ -53,14 +52,18 @@ class AuthController extends StateNotifier<AsyncValue<UserModel?>> {
       state = AsyncValue.data(updatedUser);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
+      throw e;
     }
   }
 
   Future<void> logout() async {
-    // Log logout activity
-    await _ref.read(historyServiceProvider).logAuthActivity(false);
-    await _repository.logout();
-    state = const AsyncValue.data(null);
+    try {
+      await _ref.read(historyServiceProvider).logAuthActivity(false);
+      await _repository.logout();
+      state = const AsyncValue.data(null);
+    } catch (e) {
+      // Ignore logout errors
+    }
   }
 }
 

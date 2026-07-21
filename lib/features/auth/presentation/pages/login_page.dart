@@ -6,7 +6,7 @@ import 'package:study_assistent/features/auth/domain/models/user_model.dart';
 import 'package:study_assistent/features/auth/presentation/providers/auth_provider.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
-  final UserRole? role; // Optional: can be null if coming from general login
+  final UserRole? role;
   const LoginPage({super.key, this.role});
 
   @override
@@ -18,6 +18,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _passwordFocusNode = FocusNode();
+  bool _obscurePassword = true;
   
   late UserRole _currentRole;
 
@@ -35,14 +36,34 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     super.dispose();
   }
 
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.redAccent,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    await ref.read(authControllerProvider.notifier).login(
-          _emailController.text.trim(),
-          _passwordController.text.trim(),
-          _currentRole,
-        );
+    try {
+      await ref.read(authControllerProvider.notifier).login(
+            _emailController.text.trim(),
+            _passwordController.text.trim(),
+            _currentRole,
+          );
+    } catch (e) {
+      if (mounted) {
+        // Show the exact reason from Firebase
+        _showError(e.toString().replaceAll('Exception: ', ''));
+      }
+    }
   }
 
   @override
@@ -67,7 +88,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 Icon(
                   isTeacher ? Icons.assignment_ind_rounded : Icons.school_rounded,
                   size: 80,
-                  color: AppColors.primary,
+                  color: isTeacher ? AppColors.secondary : AppColors.primary,
                 ),
                 const SizedBox(height: 24),
                 Text(
@@ -78,60 +99,50 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         color: AppColors.textPrimaryLight,
                       ),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  'Sign in as ${isTeacher ? "Teacher" : "Student"} to continue',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: AppColors.textSecondaryLight),
-                ),
                 const SizedBox(height: 40),
                 
-                // Email Field - Enter moves to Password
                 TextFormField(
                   controller: _emailController,
                   decoration: const InputDecoration(
                     labelText: 'Email Address',
                     prefixIcon: Icon(Icons.email_outlined),
+                    border: OutlineInputBorder(),
                   ),
                   keyboardType: TextInputType.emailAddress,
-                  textInputAction: TextInputAction.next,
-                  onFieldSubmitted: (_) => FocusScope.of(context).requestFocus(_passwordFocusNode),
-                  validator: (v) => v!.isEmpty ? 'Enter your email' : null,
+                  validator: (v) => (v == null || !v.contains('@')) ? 'Enter a valid email' : null,
                 ),
                 const SizedBox(height: 20),
                 
-                // Password Field - Enter submits form
                 TextFormField(
                   controller: _passwordController,
                   focusNode: _passwordFocusNode,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Password',
-                    prefixIcon: Icon(Icons.lock_outline_rounded),
+                    prefixIcon: const Icon(Icons.lock_outline_rounded),
+                    border: const OutlineInputBorder(),
+                    suffixIcon: IconButton(
+                      icon: Icon(_obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined),
+                      onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                    ),
                   ),
-                  obscureText: true,
-                  textInputAction: TextInputAction.done,
-                  onFieldSubmitted: (_) => _submit(),
+                  obscureText: _obscurePassword,
                   validator: (v) => v!.length < 6 ? 'Password too short' : null,
                 ),
                 
-                const SizedBox(height: 12),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () {},
-                    child: const Text('Forgot Password?'),
-                  ),
-                ),
                 const SizedBox(height: 32),
                 
-                ElevatedButton(
-                  onPressed: authState.isLoading ? null : _submit,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: isTeacher ? AppColors.secondary : AppColors.primary,
+                SizedBox(
+                  height: 56,
+                  child: ElevatedButton(
+                    onPressed: authState.isLoading ? null : _submit,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: isTeacher ? AppColors.secondary : AppColors.primary,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: authState.isLoading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : const Text('Sign In', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   ),
-                  child: authState.isLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text('Sign In'),
                 ),
                 
                 const SizedBox(height: 24),

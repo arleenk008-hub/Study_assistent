@@ -6,49 +6,52 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:study_assistent/core/router/app_router.dart';
 import 'package:study_assistent/core/theme/app_theme.dart';
 import 'package:study_assistent/core/providers/theme_provider.dart';
-import 'package:study_assistent/core/providers/auth_mode_provider.dart';
 import 'package:study_assistent/core/services/notification_service.dart';
-import 'package:study_assistent/features/auth/data/services/auth_service_factory.dart';
 import 'package:study_assistent/firebase_options.dart'; 
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
+  // 1. Initialize Firebase but don't crash if it fails
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
   } catch (e) {
-    debugPrint('Firebase error: $e');
+    debugPrint('Firebase not configured yet: $e');
   }
 
+  // 2. Initialize Hive
   await Hive.initFlutter();
-  await Hive.openBox('study_history_cache');
-  await Hive.openBox('offline_history');
-  await Hive.openBox('achievements');
+  try {
+    await Hive.openBox('study_history_cache');
+    await Hive.openBox('offline_history');
+    await Hive.openBox('achievements');
+  } catch (e) {
+    debugPrint('Hive Init Error: $e');
+  }
   
+  // 3. Initialize Notifications
   final notificationService = NotificationService();
   await notificationService.init();
   
   runApp(
     const ProviderScope(
-      child: StudyAIApp(),
+      child: MentoraApp(),
     ),
   );
 }
 
-class StudyAIApp extends ConsumerWidget {
-  const StudyAIApp({super.key});
+class MentoraApp extends ConsumerWidget {
+  const MentoraApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeModeProvider);
     final router = ref.watch(routerProvider);
-    final authMode = ref.watch(authModeProvider);
-    AuthServiceFactory.setAuthMode(authMode);
 
     return MaterialApp.router(
-      title: 'StudyAI',
+      title: 'Mentora',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
