@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hive/hive.dart';
+import 'package:flutter/foundation.dart';
 import '../../domain/models/study_activity.dart';
 import '../../domain/repositories/history_repository_interface.dart';
 
@@ -36,15 +37,30 @@ class HistoryRepository implements IHistoryRepository {
         completionPercentage: activity.completionPercentage,
       );
 
+      // 1. Firebase (Timestamps)
       await docRef.set(activityWithId.toFirestore());
       
-      // Cache locally
-      final box = await Hive.openBox(_boxName);
-      await box.put(activityWithId.id, activityWithId.toFirestore());
+      // 2. Hive (ISO Strings)
+      try {
+        final box = await Hive.openBox(_boxName);
+        await box.put(activityWithId.id, activityWithId.toMap());
+      } catch (e) {
+        debugPrint('Hive Cache Error, clearing box: $e');
+        final box = await Hive.openBox(_boxName);
+        await box.clear(); // Clear corrupt data
+        await box.put(activityWithId.id, activityWithId.toMap());
+      }
     } catch (e) {
-      // Log to local storage for later sync if offline
-      final box = await Hive.openBox('offline_history');
-      await box.add(activity.toFirestore());
+      // Offline fallback
+      try {
+        final box = await Hive.openBox('offline_history');
+        await box.add(activity.toMap());
+      } catch (hiveErr) {
+        debugPrint('Hive Offline Error, clearing box: $hiveErr');
+        final box = await Hive.openBox('offline_history');
+        await box.clear();
+        await box.add(activity.toMap());
+      }
       rethrow;
     }
   }
@@ -110,13 +126,21 @@ class HistoryRepository implements IHistoryRepository {
   @override
   Future<void> syncOfflineActivities() async {
     if (_uid == null) return;
-    final box = await Hive.openBox('offline_history');
-    if (box.isEmpty) return;
+    try {
+      final box = await Hive.openBox('offline_history');
+      if (box.isEmpty) return;
 
-    for (var key in box.keys) {
-      final data = Map<String, dynamic>.from(box.get(key));
-      await _firestore.collection('users').doc(_uid).collection('history').add(data);
+      for (var key in box.keys) {
+        final rawData = box.get(key);
+        if (rawData == null) continue;
+        
+        final data = Map<String, dynamic>.from(rawData);
+        final activity = StudyActivity.fromMap(data, '');
+        await _firestore.collection('users').doc(_uid).collection('history').add(activity.toFirestore());
+      }
+      await box.clear();
+    } catch (e) {
+      debugPrint('Sync Error: $e');
     }
-    await box.clear();
   }
 }

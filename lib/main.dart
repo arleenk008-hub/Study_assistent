@@ -12,26 +12,31 @@ import 'package:study_assistent/firebase_options.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // 1. Initialize Firebase but don't crash if it fails
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
   } catch (e) {
-    debugPrint('Firebase not configured yet: $e');
+    debugPrint('Firebase Init Error: $e');
   }
 
-  // 2. Initialize Hive
   await Hive.initFlutter();
+  
+  // FIX: Clear boxes to remove any "Timestamp" objects that are causing crashes
   try {
+    await Hive.deleteBoxFromDisk('study_history_cache');
+    await Hive.deleteBoxFromDisk('offline_history');
+    
     await Hive.openBox('study_history_cache');
     await Hive.openBox('offline_history');
     await Hive.openBox('achievements');
   } catch (e) {
-    debugPrint('Hive Init Error: $e');
+    debugPrint('Hive Reset Error: $e');
+    // If opening fails, try to just open them normally
+    await Hive.openBox('study_history_cache');
+    await Hive.openBox('offline_history');
   }
   
-  // 3. Initialize Notifications
   final notificationService = NotificationService();
   await notificationService.init();
   

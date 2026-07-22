@@ -19,7 +19,6 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   
-  // Focus nodes for keyboard navigation
   final _emailFocusNode = FocusNode();
   final _passwordFocusNode = FocusNode();
   
@@ -44,7 +43,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           children: [
             const Icon(Icons.error_outline, color: Colors.white),
             const SizedBox(width: 12),
-            Expanded(child: Text(message, style: const TextStyle(color: Colors.white))),
+            Expanded(child: Text(message)),
           ],
         ),
         backgroundColor: Colors.redAccent,
@@ -71,11 +70,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             widget.role,
           );
     } catch (e) {
-      String errorMsg = e.toString().replaceAll('Exception: ', '');
-      if (errorMsg.contains('network-request-failed')) {
-        errorMsg = 'No internet connection. Please check your data.';
-      }
-      _showError(errorMsg);
+      _showError(e.toString().replaceAll('Exception: ', ''));
     }
   }
 
@@ -87,7 +82,6 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(isTeacher ? 'Teacher Signup' : 'Student Signup'),
-        backgroundColor: Colors.transparent,
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -108,7 +102,6 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 ),
                 const SizedBox(height: 40),
                 
-                // Name Field
                 TextFormField(
                   controller: _nameController,
                   decoration: const InputDecoration(
@@ -116,13 +109,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     prefixIcon: Icon(Icons.person_outline_rounded),
                     border: OutlineInputBorder(),
                   ),
-                  textInputAction: TextInputAction.next,
-                  onFieldSubmitted: (_) => FocusScope.of(context).requestFocus(_emailFocusNode),
-                  validator: (v) => v!.isEmpty ? 'Please enter your name' : null,
+                  validator: (v) => v!.isEmpty ? 'Enter your name' : null,
                 ),
                 const SizedBox(height: 16),
                 
-                // Email Field
                 TextFormField(
                   controller: _emailController,
                   focusNode: _emailFocusNode,
@@ -131,14 +121,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     prefixIcon: Icon(Icons.email_outlined),
                     border: OutlineInputBorder(),
                   ),
-                  keyboardType: TextInputType.emailAddress,
-                  textInputAction: TextInputAction.next,
-                  onFieldSubmitted: (_) => FocusScope.of(context).requestFocus(_passwordFocusNode),
                   validator: (v) => (v == null || !v.contains('@')) ? 'Enter a valid email' : null,
                 ),
                 const SizedBox(height: 16),
                 
-                // Password Field
                 TextFormField(
                   controller: _passwordController,
                   focusNode: _passwordFocusNode,
@@ -152,20 +138,22 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     ),
                   ),
                   obscureText: _obscurePassword,
-                  textInputAction: TextInputAction.done,
-                  onFieldSubmitted: (_) => _submit(),
                   validator: (v) => v!.length < 6 ? 'Password must be 6+ characters' : null,
                 ),
                 const SizedBox(height: 16),
                 
-                Row(
-                  children: [
-                    Checkbox(
-                      value: _agreedToTerms,
-                      onChanged: (v) => setState(() => _agreedToTerms = v!),
-                    ),
-                    const Expanded(child: Text('I agree to the terms & conditions')),
-                  ],
+                // Clickable Checkbox Row
+                InkWell(
+                  onTap: () => setState(() => _agreedToTerms = !_agreedToTerms),
+                  child: Row(
+                    children: [
+                      Checkbox(
+                        value: _agreedToTerms,
+                        onChanged: (v) => setState(() => _agreedToTerms = v!),
+                      ),
+                      const Expanded(child: Text('I agree to the terms & conditions')),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 32),
                 

@@ -11,6 +11,7 @@ import '../../features/home/presentation/pages/student_dashboard.dart';
 import '../../features/teacher/presentation/pages/teacher_dashboard.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/profile/presentation/pages/settings_page.dart';
+import '../../features/profile/presentation/pages/student_edit_profile_page.dart';
 import '../../features/splash/presentation/pages/splash_page.dart';
 import '../../features/history/presentation/pages/history_page.dart';
 import 'package:study_assistent/features/notifications/presentation/pages/notifications_page.dart';
@@ -23,26 +24,47 @@ import 'package:study_assistent/features/teacher/presentation/pages/teacher_edit
 import 'package:study_assistent/features/teacher/presentation/pages/student_requests_page.dart';
 import 'package:study_assistent/features/notes/presentation/pages/add_note_page.dart';
 
+// RouterNotifier helps GoRouter react to Auth state changes
+class RouterNotifier extends ChangeNotifier {
+  final Ref _ref;
+  RouterNotifier(this._ref) {
+    _ref.listen(authStateProvider, (previous, next) {
+      if (previous != next) {
+        notifyListeners();
+      }
+    });
+  }
+}
+
+final routerNotifierProvider = ChangeNotifierProvider((ref) => RouterNotifier(ref));
+
 final routerProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authStateProvider);
+  // Use ref.read for the notifier to keep the GoRouter instance stable
+  final notifier = ref.read(routerNotifierProvider);
 
   return GoRouter(
     initialLocation: '/splash',
+    refreshListenable: notifier,
     redirect: (context, state) {
-      final user = authState.value;
+      final authValue = ref.read(authStateProvider);
+      final user = authValue.value;
+      
       final isSplash = state.uri.path == '/splash';
       final isWelcome = state.uri.path == '/welcome';
       final isAuth = state.uri.path == '/login' || 
                     state.uri.path == '/register' || 
                     state.uri.path == '/auth-role';
 
-      if (authState.isLoading) return null;
+      // Stay on Splash while loading the initial auth state
+      if (authValue.isLoading && isSplash) return null;
 
       if (user == null) {
+        // Not logged in: allow splash, welcome, and auth pages, else redirect to welcome
         if (isSplash || isWelcome || isAuth) return null;
         return '/welcome';
       }
 
+      // Logged in: if on an auth-related page, redirect to correct dashboard
       if (isSplash || isWelcome || isAuth) {
         return user.role == UserRole.teacher ? '/teacher-dashboard' : '/';
       }
@@ -91,6 +113,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/profile',
         builder: (context, state) => const ProfilePage(),
+      ),
+      GoRoute(
+        path: '/edit-profile',
+        builder: (context, state) => const StudentEditProfilePage(),
       ),
       GoRoute(
         path: '/settings',

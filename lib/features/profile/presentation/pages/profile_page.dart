@@ -194,7 +194,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 if (user?.role == UserRole.teacher) {
                   context.push('/teacher-edit-profile');
                 } else {
-                  // Standard profile edit for students can be added here
+                  context.push('/edit-profile');
                 }
               },
             ),
